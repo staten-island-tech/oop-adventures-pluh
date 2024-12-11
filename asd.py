@@ -1,38 +1,27 @@
-import pygame 
-import sys
+import turtle
 
-# Initialize Pygame
-pygame.init()
+# Set up the screen for Turtle
+screen = turtle.Screen()
+screen.bgcolor("black")  # Set the background to black
+screen.title("Turtle Interactive Game")
 
-# Set up the screen dimensions
-screen_width = 800
-screen_height = 600
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Text-Based Adventure Game with Background")
+# Create a turtle object for drawing
+my_turtle = turtle.Turtle()
+my_turtle.color("white")
+my_turtle.penup()
 
-# Load your background image (replace with your image file)
-background = pygame.image.load("background_image.jpg")  # Ensure your image file is in the same directory or specify the full path
-background = pygame.transform.scale(background, (screen_width, screen_height))  # Resize if needed
+# Function to handle mouse clicks
+def on_click(x, y):
+    my_turtle.clear()  # Clear any previous text
+    my_turtle.goto(x, y)  # Move the turtle to where the user clicked
+    my_turtle.write("You clicked here!", align="center", font=("Arial", 16, "normal"))
 
-# Main game loop
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+# Set up click listener
+screen.onclick(on_click)
 
-    # Draw the background image on the screen
-    screen.blit(background, (0, 0))
+# Instructions
+my_turtle.goto(0, 250)
+my_turtle.write("Click anywhere on the screen!", align="center", font=("Arial", 16, "normal"))
 
-    # Add any game objects or text on top of the background here
-    # For example, adding a simple message:
-    font = pygame.font.Font(None, 36)
-    text = font.render("Welcome to the Adventure Game!", True, (255, 255, 255))
-    screen.blit(text, (250, 50))  # Position the text on the screen
-
-    # Update the display
-    pygame.display.flip()
-
-# Quit the game when the loop ends
-pygame.quit()
-sys.exit()
+# Keep the Turtle window open until clicked
+turtle.mainloop()
