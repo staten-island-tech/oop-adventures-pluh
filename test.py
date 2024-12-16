@@ -10,8 +10,9 @@ screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Text-Based Adventure Game with Background")
 
-# Set background color to black (RGB value for black is (0, 0, 0))
-BLACK = (0, 0, 0)
+# Set the background image (replace with the actual file path)
+background_image = pygame.image.load('b3916745-37c4-44f1-8a7f-fd2d12a8b3ce.jfif')  # Load the image
+background_image = pygame.transform.scale(background_image, (screen_width, screen_height))  # Scale it to fit the screen
 
 # Main game loop
 running = True
@@ -20,11 +21,10 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Fill the screen with black
-    screen.fill(BLACK)
+    # Draw the background image
+    screen.blit(background_image, (0, 0))  # Draw the background at (0, 0)
 
-    # Add any game objects or text on top of the black background here
-    # For example, adding a simple message:
+    # Add any game objects or text on top of the background here
     font = pygame.font.Font(None, 36)
     text = font.render("Welcome to the Adventure Game!", True, (255, 255, 255))  # White text
     screen.blit(text, (250, 50))  # Position the text on the screen

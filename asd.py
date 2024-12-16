@@ -1,9 +1,20 @@
 import turtle
 
 # Set up the screen for Turtle
+# turtle_bg_image_01.py
+#
+# It works!
+#
+ 
+import turtle
+import time
+ 
 screen = turtle.Screen()
-screen.bgcolor("black")  # Set the background to black
-screen.title("Turtle Interactive Game")
+screen.setup(600,400)
+screen.bgpic('D:/programmation related/Butterfly_01.png')
+screen.update()
+time.sleep(2)
+screen.bgpic('D:/programmation related/complex_quotations_02.PNG')
 
 # Create a turtle object for drawing
 my_turtle = turtle.Turtle()
