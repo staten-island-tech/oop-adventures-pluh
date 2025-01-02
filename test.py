@@ -10,13 +10,15 @@ screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Text-Based Adventure Game with Background")
 
-# Set the background images for the main menu, game screen, and village
+# Set the background images for the main menu, game screen, village, and war
 background_image_menu = pygame.image.load('Blackboy.jpg')  # Main menu background
 background_image_game = pygame.image.load('Olukunle.jpg')  # Game screen background
 background_image_village = pygame.image.load('market.jpg')  # Market background for Village
+background_image_war = pygame.image.load('Ready.jpg')  # War background after purchase
 background_image_menu = pygame.transform.scale(background_image_menu, (screen_width, screen_height))  # Scale to fit
 background_image_game = pygame.transform.scale(background_image_game, (screen_width, screen_height))  # Scale to fit
 background_image_village = pygame.transform.scale(background_image_village, (screen_width, screen_height))  # Scale to fit
+background_image_war = pygame.transform.scale(background_image_war, (screen_width, screen_height))  # Scale to fit
 
 # Define button colors
 button_color = (255, 0, 0)  # Red
@@ -48,6 +50,7 @@ class Item:
         self.name = name
         self.cost = cost
         self.rect = rect  # Position for the item in the shop
+        self.purchased = False  # Track if the item is purchased
 
     def can_afford(self, player_money):
         return player_money >= self.cost
@@ -57,6 +60,7 @@ class Item:
         if self.can_afford(money):
             money -= self.cost
             inventory.append(self.name)  # Add item to the player's inventory
+            self.purchased = True  # Mark the item as purchased
             return True
         return False
 
@@ -121,16 +125,18 @@ def draw_money_counter():
     money_surface = font.render(money_text, True, (255, 255, 255))  # White text
     screen.blit(money_surface, (10, 10))  # Top-left corner
 
-# Function to display inventory
+# Function to display inventory in the bottom-right corner
 def display_inventory():
     inventory_text = "Inventory: " + ", ".join(inventory)
     inventory_surface = font.render(inventory_text, True, (255, 255, 255))  # White text
-    screen.blit(inventory_surface, (10, 50))  # Right below the money counter
+    text_width, text_height = inventory_surface.get_size()
+    screen.blit(inventory_surface, (screen_width - text_width - 10, screen_height - text_height - 10))  # Bottom-right corner
 
 # Main game loop
 running = True
 current_screen = "menu"  # Start at the main menu screen
 user_input = ""
+purchase_complete = False  # Flag to track if purchase is complete
 
 while running:
     for event in pygame.event.get():
@@ -155,21 +161,36 @@ while running:
 
             # Check for item purchases in the village
             if current_screen == "village":
-                if warrior_monkey.rect.collidepoint(mouse_x, mouse_y):
+                if warrior_monkey.rect.collidepoint(mouse_x, mouse_y) and not warrior_monkey.purchased:
                     if warrior_monkey.purchase():
                         print("Warrior Monkey purchased! Added to inventory.")
+                        # Change the background to Ready.jpg after purchase
+                        background_image_village = background_image_war
+                        purchase_complete = True
                     else:
                         print("Not enough money for Warrior Monkey.")
-                elif banana.rect.collidepoint(mouse_x, mouse_y):
+                elif banana.rect.collidepoint(mouse_x, mouse_y) and not banana.purchased:
                     if banana.purchase():
                         print("Banana purchased! Added to inventory.")
+                        # Change the background to Ready.jpg after purchase
+                        background_image_village = background_image_war
+                        purchase_complete = True
                     else:
                         print("Not enough money for Banana.")
-                elif machete.rect.collidepoint(mouse_x, mouse_y):
+                elif machete.rect.collidepoint(mouse_x, mouse_y) and not machete.purchased:
                     if machete.purchase():
                         print("Machete purchased! Added to inventory.")
+                        # Change the background to Ready.jpg after purchase
+                        background_image_village = background_image_war
+                        purchase_complete = True
                     else:
                         print("Not enough money for Machete.")
+
+                # Disable other items after one purchase
+                if warrior_monkey.purchased or banana.purchased or machete.purchased:
+                    warrior_monkey.rect = pygame.Rect(0, 0, 0, 0)
+                    banana.rect = pygame.Rect(0, 0, 0, 0)
+                    machete.rect = pygame.Rect(0, 0, 0, 0)
 
     # Draw everything
     if current_screen == "menu":
@@ -214,20 +235,29 @@ while running:
         screen.fill((255, 255, 255))  # White background
         screen.blit(background_image_village, (0, 0))  # Draw market background for village
 
-        # Display the text for Village selection
-        village_text = font.render("You are in the village market!", True, (255, 255, 255))
-        screen.blit(village_text, (250, 50))
+        # If purchase is complete, show "Alright, you're done, let's get battling"
+        if purchase_complete:
+            battle_text = font.render("Alright, you're done, let's get battling!", True, (150, 100, 7))
+            screen.blit(battle_text, (200, 30))  # Display at the top
 
-        # Draw items for purchase
-        draw_button(warrior_monkey.rect, f"Warrior Monkey: {warrior_monkey.cost} Naira")
-        draw_button(banana.rect, f"Banana: {banana.cost} Naira")
-        draw_button(machete.rect, f"Machete: {machete.cost} Naira")
+        # Remove "You are in the village market!" text after purchase
+        if not purchase_complete:
+            village_text = font.render("You are in the village market!", True, (255, 255, 255))
+            screen.blit(village_text, (250, 50))  # Display village market text
 
-        # Display the player's inventory
-        display_inventory()
+        # Draw items for purchase (only if not purchased)
+        if not warrior_monkey.purchased:
+            draw_button(warrior_monkey.rect, f"Warrior Monkey: {warrior_monkey.cost} Naira")
+        if not banana.purchased:
+            draw_button(banana.rect, f"Banana: {banana.cost} Naira")
+        if not machete.purchased:
+            draw_button(machete.rect, f"Machete: {machete.cost} Naira")
 
     # Draw the money counter in the top-left corner
     draw_money_counter()
+
+    # Display inventory in bottom-right corner
+    display_inventory()
 
     # Update the display
     pygame.display.flip()
