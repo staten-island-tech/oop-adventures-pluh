@@ -4,7 +4,7 @@ import time
 import random
 
 # Initialize score variables
-naira = 0  # Changed from score to naira
+banana_count = 0  # Changed from naira to banana_count
 delay = 0.1
 
 # Setup the screen
@@ -36,22 +36,19 @@ fruit.goto(0, 100)  # Position the banana initially
 # Obstacles setup
 obstacles = []
 
+
 def create_obstacles():
     global obstacles
-    obstacles.clear()  # Clear existing obstacles
-    for _ in range(5):  # Create 5 obstacles
-        obstacle = turtle.Turtle()
-        obstacle.speed(0)
-        obstacle.shape("circle")
-        obstacle.color("black")
-        obstacle.penup()
-        x = random.randint(-290, 290)
-        y = random.randint(-290, 290)
-        obstacle.goto(x, y)
-        obstacles.append(obstacle)
-
-# Naira (black circle) setup
-naira_circles = []  # This list will hold the black circles representing Naira
+    # Create 1 new obstacle when a banana is collected
+    obstacle = turtle.Turtle()
+    obstacle.speed(0)
+    obstacle.shape("circle")
+    obstacle.color("black")
+    obstacle.penup()
+    x = random.randint(-290, 290)
+    y = random.randint(-290, 290)
+    obstacle.goto(x, y)
+    obstacles.append(obstacle)
 
 # Scoring display setup
 score_display = turtle.Turtle()
@@ -127,11 +124,11 @@ def display_start_screen():
     window1.onkey(start_game, "Return")  # 'Enter' key starts the game
 
 def start_game():
-    global naira, direction, start_screen, game_over_flag
-    naira = 0  # Reset naira
+    global banana_count, direction, start_screen, game_over_flag
+    banana_count = 0  # Reset banana_count
     direction = "stop"  # Reset direction
     score_display.clear()
-    score_display.write("Naira: {}".format(naira), align="center", font=("Courier", 16, "normal"))
+    score_display.write("Bananas: {}".format(banana_count), align="center", font=("Courier", 16, "normal"))
     window1.tracer(1)  # Enable game loop
 
     # Clear the start screen text
@@ -153,7 +150,7 @@ def start_game():
 
 # Main game loop after start screen
 def game_loop():
-    global naira, delay, game_over_flag
+    global banana_count, delay, game_over_flag
     while not game_over_flag:
         window1.update()  # Updates the screen
         
@@ -169,19 +166,18 @@ def game_loop():
             y = random.randint(-290, 290)
             fruit.goto(x, y)
             
-            # Increase naira (10 Naira per banana collected)
-            naira += 10
+            # Increase banana_count by 1
+            banana_count += 1
             score_display.clear()
-            score_display.write("Naira: {}".format(naira), align="center", font=("Courier", 16, "normal"))
+            score_display.write("Bananas: {}".format(banana_count), align="center", font=("Courier", 16, "normal"))
             
-            # Add a black circle (representing Naira) at the snake's position
-            naira_circle = turtle.Turtle()
-            naira_circle.speed(0)
-            naira_circle.shape("circle")
-            naira_circle.color("black")
-            naira_circle.penup()
-            naira_circle.goto(snake[0].xcor(), snake[0].ycor())
-            naira_circles.append(naira_circle)
+            # If 5 bananas are collected, end the game
+            if banana_count >= 5:
+                game_over()
+                break
+            
+            # Create a new black circle (obstacle) after collecting a banana
+            create_obstacles()
         
         # Check for collision with the obstacles
         for obstacle in obstacles:
@@ -202,19 +198,13 @@ def game_loop():
         time.sleep(delay)  # Control the speed of the game
 
 # Handle the game over and offer restart option
-# Handle the game over and offer restart option
 def game_over():
-    global naira, game_over_flag
+    global banana_count, game_over_flag
     game_over_flag = True  # Set the flag to stop the snake from moving
     
-    # Deduct 30 Naira when the player loses
-    naira -= 30
-    if naira < 0:
-        naira = 0  # Ensure naira doesn't go negative
-
     # Clear the score display and show the game over message
     score_display.clear()
-    score_display.write(f"Game Over! You lost 30 Naira to a tribe man. Press 'Enter' to Restart", align="center", font=("Courier", 16, "normal"))
+    score_display.write(f"Game Over! You collected {banana_count} Bananas. Press 'Enter' to Restart", align="center", font=("Courier", 16, "normal"))
     
     # Update the screen
     window1.update()
@@ -223,18 +213,9 @@ def game_over():
     window1.listen()
     window1.onkey(start_game, "Return")  # 'Enter' key restarts the game
 
-    # Hide obstacles and Naira circles after game over
+    # Hide obstacles after game over
     for obstacle in obstacles:
         obstacle.hideturtle()  # Hide obstacles (without creating more)
-    for naira_circle in naira_circles:
-        naira_circle.hideturtle()  # Hide Naira circles
-  # 'Enter' key restarts the game
-
-    # Clear obstacles and naira_circles after game over
-    for obstacle in obstacles:
-        obstacle.hideturtle()  # Hide the obstacles (without creating more)
-    for naira_circle in naira_circles:
-        naira_circle.hideturtle()  # Hide the Naira circles
 
 # Start the game by displaying the start screen
 display_start_screen()
