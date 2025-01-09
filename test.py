@@ -142,14 +142,18 @@ def display_inventory():
 # Function to load collectbanana.py when Continue is clicked
 def load_collectbanana():
     if os.path.exists("collectbanana.py"):
-        os.system("python collectbanana.py")
+        os.system("python collectbanana.py")  # Run the collectbanana.py script
     else:
-        print("collectbanana.py not found!")
+        print("collectbanana.py not found!")  # If the script doesn't exist
+
+# Track bananas collected
+bananas_collected = {"Monkey": 0, "Machete": 0, "Banana": 0}
 
 # Main game loop
 running = True
 current_screen = "menu"  # Start at the main menu screen
 purchase_complete = False  # Flag to track if purchase is complete
+battle_text_displayed = False  # Track if the new message is displayed
 
 while running:
     for event in pygame.event.get():
@@ -172,16 +176,22 @@ while running:
             if current_screen == "village":
                 if warrior_monkey.rect.collidepoint(mouse_x, mouse_y) and not warrior_monkey.purchased:
                     if warrior_monkey.purchase():
+                        bananas_collected["Monkey"] = 5  # Monkey collects 5 bananas
                         background_image_village = background_image_war  # Update background after purchase
                         purchase_complete = True
+                        battle_text_displayed = True  # Set flag to show new message
                 elif banana.rect.collidepoint(mouse_x, mouse_y) and not banana.purchased:
                     if banana.purchase():
+                        bananas_collected["Banana"] = 4  # Banana collects 4 bananas
                         background_image_village = background_image_war  # Update background after purchase
                         purchase_complete = True
+                        battle_text_displayed = True  # Set flag to show new message
                 elif machete.rect.collidepoint(mouse_x, mouse_y) and not machete.purchased:
                     if machete.purchase():
+                        bananas_collected["Machete"] = 3  # Machete collects 3 bananas
                         background_image_village = background_image_war  # Update background after purchase
                         purchase_complete = True
+                        battle_text_displayed = True  # Set flag to show new message
 
                 # Disable items after purchase
                 if warrior_monkey.purchased or banana.purchased or machete.purchased:
@@ -191,7 +201,10 @@ while running:
 
             # Handle Continue Button click
             if button_continue_rect.collidepoint(mouse_x, mouse_y):  # If clicked inside Continue button
-                load_collectbanana()  # Call the function to load collectbanana.py
+                if current_screen == "jungle":
+                    load_collectbanana()  # Call the function to load collectbanana.py
+                elif battle_text_displayed:
+                    current_screen = "jungle"  # Move to jungle screen after battle text
 
     # Rendering based on current screen
     if current_screen == "menu":
@@ -212,7 +225,7 @@ while running:
         screen.blit(background_image_village, (0, 0))  # Draw village background
 
         if purchase_complete:
-            battle_text = font.render("Alright, you're done, let's get battling!", True, (150, 100, 7))
+            battle_text = font.render("If you want to survive, collect bananas to survive!", True, (150, 100, 7))
             screen.blit(battle_text, (200, 30))  # Display after purchase
         else:
             village_text = font.render("You are in the village market!", True, (255, 255, 255))
@@ -231,12 +244,19 @@ while running:
     elif current_screen == "jungle":
         screen.fill((255, 255, 255))  # White background
         screen.blit(background_image_jungle, (0, 0))  # Draw jungle background
-        jungle_text = font.render("You are now in the jungle!", True, (255, 255, 255))
+        jungle_text = font.render(f"Nice! While you were gone, your items collected bananas for you", True, (255, 255, 255))
 
+        # Display collected bananas
+        banana_message = f"Monkey: {bananas_collected['Monkey']} bananas, Machete: {bananas_collected['Machete']} bananas, Banana: {bananas_collected['Banana']} bananas"
+        collected_bananas_text = font.render(banana_message, True, (255, 255, 255))
+        
         # Recenter text at the bottom
         text_width, text_height = jungle_text.get_size()
-        screen.blit(jungle_text, ((screen_width - text_width) // 2, screen_height - text_height - 40))  # Bottom-center text
+        screen.blit(jungle_text, ((screen_width - text_width) // 2, screen_height - text_height - 60))  # Bottom-center text
 
+        text_width, text_height = collected_bananas_text.get_size()
+        screen.blit(collected_bananas_text, ((screen_width - text_width) // 2, screen_height - text_height - 20))  # Bottom-center text
+        
         # Draw Continue Button
         draw_button(button_continue_rect, "Continue")  # Draw Continue button
 
@@ -246,6 +266,4 @@ while running:
     pygame.display.flip()
 
 pygame.quit()
-sys.exit()
-
 sys.exit()
