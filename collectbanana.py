@@ -11,7 +11,7 @@ delay = 0.1
 window1 = turtle.Screen()
 window1.title("Banana Game")
 window1.setup(width=600, height=600)
-window1.bgcolor("green")  # Changed the background color to green
+window1.bgcolor("green")  # Set the initial background to green
 window1.tracer(0)  # Turns off automatic screen updates for better performance
 
 # Snake setup (one brown circle as snake)
@@ -186,8 +186,8 @@ def game_loop():
             # Check if the player has collected 5 bananas
             if banana >= 5:
                 score_display.clear()
-                score_display.write("You collected 5 Bananas! Game Over!", align="center", font=("Courier", 16, "normal"))
-                game_over()
+                score_display.write(f"You won {banana} Bananas! Cancel out to advance", align="center", font=("Courier", 16, "normal"))
+                game_won()
                 break
         
         # Check for collision with the obstacles
@@ -220,7 +220,7 @@ def game_over():
 
     # Clear the score display and show the game over message
     score_display.clear()
-    score_display.write(f"Game Over! You lost 30 Banana. Press 'Enter' to Restart", align="center", font=("Courier", 16, "normal"))
+    score_display.write(f"Game Over! Press 'Enter' to Restart", align="center", font=("Courier", 16, "normal"))
     
     # Update the screen
     window1.update()
@@ -234,6 +234,19 @@ def game_over():
         obstacle.hideturtle()  # Hide obstacles (without creating more)
     for banana_circle in banana_circles:
         banana_circle.hideturtle()  # Hide Banana circles
+
+def game_won():
+    global game_over_flag
+    game_over_flag = True  # Stop the snake from moving
+    
+    # Change the background to yay.jpg when the player wins
+    window1.bgpic("yay.jpg")  # Set the background to the image "yay.jpg"
+
+    # Wait for a short period to show the "You won" message
+    time.sleep(2)
+
+    # Optionally, close the game after a short delay
+    window1.bye()  # Close the window after the game ends
 
 # Start the game by displaying the start screen
 display_start_screen()
