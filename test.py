@@ -11,17 +11,21 @@ screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Text-Based Adventure Game with Background")
 
-# Set the background images for the main menu, game screen, village, and war
+# Set the background images for the main menu, game screen, village, war, jungle, and yay
 background_image_menu = pygame.image.load('Blackboy.jpg')  # Main menu background
 background_image_game = pygame.image.load('Olukunle.jpg')  # Game screen background
 background_image_village = pygame.image.load('market.jpg')  # Market background for Village
 background_image_war = pygame.image.load('Ready.jpg')  # War background after purchase
 background_image_jungle = pygame.image.load('redopp.png')  # Jungle background
+background_image_yay = pygame.image.load('yay.jpg')  # Yay background
+
+# Scale the backgrounds
 background_image_menu = pygame.transform.scale(background_image_menu, (screen_width, screen_height))  # Scale to fit
 background_image_game = pygame.transform.scale(background_image_game, (screen_width, screen_height))  # Scale to fit
 background_image_village = pygame.transform.scale(background_image_village, (screen_width, screen_height))  # Scale to fit
 background_image_war = pygame.transform.scale(background_image_war, (screen_width, screen_height))  # Scale to fit
 background_image_jungle = pygame.transform.scale(background_image_jungle, (screen_width, screen_height))  # Scale to fit
+background_image_yay = pygame.transform.scale(background_image_yay, (screen_width, screen_height))  # Scale to fit
 
 # Define button colors
 button_color = (255, 0, 0)  # Red
@@ -202,9 +206,8 @@ while running:
             # Handle Continue Button click
             if button_continue_rect.collidepoint(mouse_x, mouse_y):  # If clicked inside Continue button
                 if current_screen == "jungle":
+                    current_screen = "yay"  # Change to "yay" screen after the battle text
                     load_collectbanana()  # Call the function to load collectbanana.py
-                elif battle_text_displayed:
-                    current_screen = "jungle"  # Move to jungle screen after battle text
 
     # Rendering based on current screen
     if current_screen == "menu":
@@ -259,6 +262,11 @@ while running:
         
         # Draw Continue Button
         draw_button(button_continue_rect, "Continue")  # Draw Continue button
+
+    elif current_screen == "yay":
+        screen.fill((255, 255, 255))  # White background
+        screen.blit(background_image_yay, (0, 0))  # Draw the yay background
+        # Any additional yay screen text or actions can go here.
 
     draw_money_counter()
     display_inventory()
