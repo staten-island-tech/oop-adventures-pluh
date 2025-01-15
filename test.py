@@ -1,31 +1,30 @@
 import pygame
-import sys
+import sys# dont relly know what this and the one below does i just know i need it 
 import subprocess
 
-# Initialize Pygame
+# Initialize the Pygame for us to use
 pygame.init()
 
-# Define the font globally
-font = pygame.font.Font(None, 36)  # Define the font globally (or use a different font if needed)
 
-# Set up the screen dimensions
+font = pygame.font.Font(None, 36)#Font for all the Text
+
 screen_width = 800
 screen_height = 600
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Text-Based Adventure Game with Background")
 
-# Set the background images for the main menu, game screen, village, war, jungle, and the new phase
-background_image_menu = pygame.image.load('Blackboy.jpg')  # Main menu background
-background_image_game = pygame.image.load('Olukunle.jpg')  # Game screen background
-background_image_village = pygame.image.load('market.jpg')  # Market background for Village
-background_image_war = pygame.image.load('Ready.jpg')  # War background after purchase
-background_image_jungle = pygame.image.load('redopp.png')  # Jungle background
-background_image_new = pygame.image.load('new.jpg')  # New background after collectbanana.py
+# Backroound images for all the parts
+background_image_menu = pygame.image.load('Blackboy.jpg') 
+background_image_game = pygame.image.load('Olukunle.jpg')
+background_image_village = pygame.image.load('market.jpg')
+background_image_war = pygame.image.load('Ready.jpg') 
+background_image_jungle = pygame.image.load('redopp.png')
+background_image_new = pygame.image.load('new.jpg')
 background_image_eat = pygame.image.load('fat.jpg')
 background_image_money = pygame.image.load('money.jpg')
 
-# Scale the background images to fit the screen
+# the pygame transform and scale data type scales all the images to fit
 background_image_menu = pygame.transform.scale(background_image_menu, (screen_width, screen_height))
 background_image_game = pygame.transform.scale(background_image_game, (screen_width, screen_height))
 background_image_village = pygame.transform.scale(background_image_village, (screen_width, screen_height))
@@ -35,35 +34,33 @@ background_image_new = pygame.transform.scale(background_image_new, (screen_widt
 background_image_eat = pygame.transform.scale(background_image_eat, (screen_width, screen_height))
 background_image_money = pygame.transform.scale(background_image_money, (screen_width, screen_height))
 
-# Define button colors
-button_color = (255, 0, 0)  # Red
+# Colors for all the buttons
+button_color = (255, 0, 0)  # Color for red
 button_hover_color = (200, 0, 0)  # Darker Red
 
 # Button positions and sizes
-button_width = 200
+button_width = 200# Size for  all the buttons
 button_height = 50
 button1_rect = pygame.Rect(300, 200, button_width, button_height)
 button2_rect = pygame.Rect(300, 300, button_width, button_height)
-button3_rect = pygame.Rect(300, 350, button_width, button_height)  # For Village option
-button4_rect = pygame.Rect(300, 400, button_width, button_height)  # For Jungle option
+button3_rect = pygame.Rect(300, 350, button_width, button_height)  #Village button
+button4_rect = pygame.Rect(300, 400, button_width, button_height)  #Jungle button
 
-# Continue button for Jungle screen
-continue_button_rect = pygame.Rect(300, 500, button_width, button_height)  # Continue button at the bottom
+# Continue button on Jungle screen
+continue_button_rect = pygame.Rect(300, 500, button_width, button_height)
 
-# Advance button for after Collect Banana game
-advance_button_rect = pygame.Rect(300, 500, button_width, button_height)  # Advance button
+# Advance button for after Collect Banana game which is for some reaon the cancel out button for the window
+advance_button_rect = pygame.Rect(300, 500, button_width, button_height) 
 
-# Eat and Sell buttons for bananas
-eat_button_rect = pygame.Rect(200, 500, button_width, button_height)  # Eat button
-sell_button_rect = pygame.Rect(500, 500, button_width, button_height)  # Sell button
+eat_button_rect = pygame.Rect(200, 500, button_width, button_height)  # eat button
+sell_button_rect = pygame.Rect(500, 500, button_width, button_height)  # sell button
 
-# Money variable (starts with 100 Naira)
+# the variable for money
 money = 100
-
-# Player's inventory (for storing purchased items)
+#no need explaining
 inventory = []
 
-# Item class for handling items in the village
+#Class for items in village shop
 class Item:
     def __init__(self, name, cost, rect):
         self.name = name
