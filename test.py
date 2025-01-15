@@ -22,6 +22,8 @@ background_image_village = pygame.image.load('market.jpg')  # Market background 
 background_image_war = pygame.image.load('Ready.jpg')  # War background after purchase
 background_image_jungle = pygame.image.load('redopp.png')  # Jungle background
 background_image_new = pygame.image.load('new.jpg')  # New background after collectbanana.py
+background_image_eat = pygame.image.load('fat.jpg')
+background_image_money = pygame.image.load('money.jpg')
 
 # Scale the background images to fit the screen
 background_image_menu = pygame.transform.scale(background_image_menu, (screen_width, screen_height))
@@ -30,6 +32,8 @@ background_image_village = pygame.transform.scale(background_image_village, (scr
 background_image_war = pygame.transform.scale(background_image_war, (screen_width, screen_height))
 background_image_jungle = pygame.transform.scale(background_image_jungle, (screen_width, screen_height))
 background_image_new = pygame.transform.scale(background_image_new, (screen_width, screen_height))
+background_image_eat = pygame.transform.scale(background_image_eat, (screen_width, screen_height))
+background_image_money = pygame.transform.scale(background_image_money, (screen_width, screen_height))
 
 # Define button colors
 button_color = (255, 0, 0)  # Red
@@ -297,8 +301,20 @@ while running:
         # Display banana status
         if banana_eaten:
             banana_status_text = "Banana eaten"
+            screen.blit(background_image_eat, (0, 0))
+
+            fat_message_text = "YOU DID IT, You are fat but at least you are happy"
+            fat_message_box_rect = pygame.Rect(50, 20, screen_width - 100, 100)
+            pygame.draw.rect(screen, (0, 0, 0), fat_message_box_rect)
+            draw_text_in_box(fat_message_text, fat_message_box_rect, font, (255, 255, 255))
         elif banana_sold:
             banana_status_text = "Banana sold"
+            screen.blit(background_image_money, (0, 0))
+
+            money_message_text = "NICE, you are now an African entrepenuer"
+            money_message_box_rect = pygame.Rect(50, 20, screen_width - 100, 100)
+            pygame.draw.rect(screen, (0, 0, 0), money_message_box_rect)
+            draw_text_in_box(money_message_text, money_message_box_rect, font, (255, 255, 255))
         else:
             banana_status_text = "Banana available"
 
