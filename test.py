@@ -1,29 +1,39 @@
 import pygame
 import sys
+import subprocess
 
 # Initialize Pygame
 pygame.init()
 
+# Define the font globally
+font = pygame.font.Font(None, 36)  # Define the font globally (or use a different font if needed)
+
 # Set up the screen dimensions
 screen_width = 800
 screen_height = 600
+
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Text-Based Adventure Game with Background")
 
-# Set the background images for the main menu, game screen, village, and war
+# Set the background images for the main menu, game screen, village, war, jungle, and the new phase
 background_image_menu = pygame.image.load('Blackboy.jpg')  # Main menu background
 background_image_game = pygame.image.load('Olukunle.jpg')  # Game screen background
 background_image_village = pygame.image.load('market.jpg')  # Market background for Village
 background_image_war = pygame.image.load('Ready.jpg')  # War background after purchase
-background_image_menu = pygame.transform.scale(background_image_menu, (screen_width, screen_height))  # Scale to fit
-background_image_game = pygame.transform.scale(background_image_game, (screen_width, screen_height))  # Scale to fit
-background_image_village = pygame.transform.scale(background_image_village, (screen_width, screen_height))  # Scale to fit
-background_image_war = pygame.transform.scale(background_image_war, (screen_width, screen_height))  # Scale to fit
+background_image_jungle = pygame.image.load('redopp.png')  # Jungle background
+background_image_new = pygame.image.load('new.jpg')  # New background after collectbanana.py
+
+# Scale the background images to fit the screen
+background_image_menu = pygame.transform.scale(background_image_menu, (screen_width, screen_height))
+background_image_game = pygame.transform.scale(background_image_game, (screen_width, screen_height))
+background_image_village = pygame.transform.scale(background_image_village, (screen_width, screen_height))
+background_image_war = pygame.transform.scale(background_image_war, (screen_width, screen_height))
+background_image_jungle = pygame.transform.scale(background_image_jungle, (screen_width, screen_height))
+background_image_new = pygame.transform.scale(background_image_new, (screen_width, screen_height))
 
 # Define button colors
 button_color = (255, 0, 0)  # Red
 button_hover_color = (200, 0, 0)  # Darker Red
-button_font = pygame.font.Font(None, 36)
 
 # Button positions and sizes
 button_width = 200
@@ -33,10 +43,15 @@ button2_rect = pygame.Rect(300, 300, button_width, button_height)
 button3_rect = pygame.Rect(300, 350, button_width, button_height)  # For Village option
 button4_rect = pygame.Rect(300, 400, button_width, button_height)  # For Jungle option
 
-# Text to be rendered on the screen
-font = pygame.font.Font(None, 36)
-welcome_text = font.render("Welcome to the Village Brother!", True, (255, 255, 255))  # White text
-fufu_text = "Do you want to go to the village or the jungle?"  # White text for "You want fufu?"
+# Continue button for Jungle screen
+continue_button_rect = pygame.Rect(300, 500, button_width, button_height)  # Continue button at the bottom
+
+# Advance button for after Collect Banana game
+advance_button_rect = pygame.Rect(300, 500, button_width, button_height)  # Advance button
+
+# Eat and Sell buttons for bananas
+eat_button_rect = pygame.Rect(200, 500, button_width, button_height)  # Eat button
+sell_button_rect = pygame.Rect(500, 500, button_width, button_height)  # Sell button
 
 # Money variable (starts with 100 Naira)
 money = 100
@@ -72,7 +87,7 @@ machete = Item("Machete", 60, pygame.Rect(50, 400, button_width, button_height))
 # Function to draw buttons
 def draw_button(rect, text):
     pygame.draw.rect(screen, button_color, rect)
-    text_surface = button_font.render(text, True, (255, 255, 255))  # White text
+    text_surface = font.render(text, True, (255, 255, 255))  # White text
     screen.blit(text_surface, (rect.x + (rect.width - text_surface.get_width()) // 2,
                                rect.y + (rect.height - text_surface.get_height()) // 2))
 
@@ -132,11 +147,35 @@ def display_inventory():
     text_width, text_height = inventory_surface.get_size()
     screen.blit(inventory_surface, (screen_width - text_width - 10, screen_height - text_height - 10))  # Bottom-right corner
 
+# Function to display rewards at the top of the 'new.jpg' background
+def display_rewards():
+    reward_text = "You won 5 Bananas! "
+
+    # Add more rewards based on purchases
+    if "Warrior Monkey" in inventory:
+        reward_text += " + 3 for Warrior Monkey"
+    if "Machete" in inventory:
+        reward_text += " + 2 for Machete"
+    if "Banana" in inventory:
+        reward_text += " + 1 for Banana"
+
+    # Draw the text box
+    message_box_rect = pygame.Rect(50, 20, screen_width - 100, 100)
+    pygame.draw.rect(screen, (0, 0, 0), message_box_rect)  # Draw background for the text box
+    draw_text_in_box(reward_text, message_box_rect, font, (255, 255, 255))  # Draw the text
+
+# Function to run the collect banana game and wait until it's closed
+def run_collect_banana():
+    subprocess.run(['python', 'collectbanana.py'])
+
 # Main game loop
 running = True
 current_screen = "menu"  # Start at the main menu screen
 user_input = ""
-purchase_complete = False  # Flag to track if purchase is complete
+collect_banana_completed = False  # Flag to track if collect banana game is done
+advance_to_next_phase = False  # Flag for when the player advances to next phase
+banana_eaten = False  # Flag to track if banana is eaten
+banana_sold = False  # Flag to track if banana is sold
 
 while running:
     for event in pygame.event.get():
@@ -157,101 +196,114 @@ while running:
                 current_screen = "village"  # Change to the village background
             elif button4_rect.collidepoint(mouse_x, mouse_y):  # If clicked inside button4
                 print("Jungle chosen")
-                # Add actions to go to the jungle here
+                current_screen = "jungle"  # Change to the jungle screen
 
-            # Check for item purchases in the village
+            # Check if Continue button is clicked
+            if current_screen == "jungle" and continue_button_rect.collidepoint(mouse_x, mouse_y):
+                print("Continue clicked")
+                run_collect_banana()  # Run collectbanana.py when clicked
+                collect_banana_completed = True  # Mark that collect banana game is completed
+
+            # Check if Advance button is clicked after banana collection
+            if collect_banana_completed and advance_button_rect.collidepoint(mouse_x, mouse_y):
+                print("Advance clicked")
+                current_screen = "new_background"  # Change to new background (new.jpg)
+
+            # Handle item purchases in village
             if current_screen == "village":
                 if warrior_monkey.rect.collidepoint(mouse_x, mouse_y) and not warrior_monkey.purchased:
-                    if warrior_monkey.purchase():
-                        print("Warrior Monkey purchased! Added to inventory.")
-                        # Change the background to Ready.jpg after purchase
-                        background_image_village = background_image_war
-                        purchase_complete = True
-                    else:
-                        print("Not enough money for Warrior Monkey.")
-                elif banana.rect.collidepoint(mouse_x, mouse_y) and not banana.purchased:
-                    if banana.purchase():
-                        print("Banana purchased! Added to inventory.")
-                        # Change the background to Ready.jpg after purchase
-                        background_image_village = background_image_war
-                        purchase_complete = True
-                    else:
-                        print("Not enough money for Banana.")
-                elif machete.rect.collidepoint(mouse_x, mouse_y) and not machete.purchased:
-                    if machete.purchase():
-                        print("Machete purchased! Added to inventory.")
-                        # Change the background to Ready.jpg after purchase
-                        background_image_village = background_image_war
-                        purchase_complete = True
-                    else:
-                        print("Not enough money for Machete.")
+                    warrior_monkey.purchase()
+                    print(f"Purchased {warrior_monkey.name}")
+                    current_screen = "jungle"  # Switch to jungle screen after purchase
 
-                # Disable other items after one purchase
-                if warrior_monkey.purchased or banana.purchased or machete.purchased:
-                    warrior_monkey.rect = pygame.Rect(0, 0, 0, 0)
-                    banana.rect = pygame.Rect(0, 0, 0, 0)
-                    machete.rect = pygame.Rect(0, 0, 0, 0)
+                elif banana.rect.collidepoint(mouse_x, mouse_y) and not banana.purchased:
+                    banana.purchase()
+                    print(f"Purchased {banana.name}")
+                    current_screen = "jungle"  # Switch to jungle screen after purchase
+
+                elif machete.rect.collidepoint(mouse_x, mouse_y) and not machete.purchased:
+                    machete.purchase()
+                    print(f"Purchased {machete.name}")
+                    current_screen = "jungle"  # Switch to jungle screen after purchase
+
+            # Handle banana eating and selling
+            if current_screen == "new_background":
+                if eat_button_rect.collidepoint(mouse_x, mouse_y) and not banana_eaten:
+                    banana_eaten = True
+                    print("Banana eaten")
+                elif sell_button_rect.collidepoint(mouse_x, mouse_y) and not banana_sold:
+                    banana_sold = True
+                    money += 50  # Add 50 Naira to the player's money
+                    print("Banana sold")
 
     # Draw everything
     if current_screen == "menu":
         # Main menu screen
         screen.fill((255, 255, 255))  # White background
         screen.blit(background_image_menu, (0, 0))  # Draw main menu background
-        screen.blit(welcome_text, (250, 50))  # Position the welcome text on the screen
 
         # Draw buttons
-        if button1_rect.collidepoint(pygame.mouse.get_pos()):
-            draw_button(button1_rect, "Start Game")
-        else:
-            draw_button(button1_rect, "Start Game")
-
-        if button2_rect.collidepoint(pygame.mouse.get_pos()):
-            draw_button(button2_rect, "Exit")
-        else:
-            draw_button(button2_rect, "Exit")
+        draw_button(button1_rect, "Start Game")
+        draw_button(button2_rect, "Exit")
 
     elif current_screen == "game":
         # Game screen
         screen.fill((255, 255, 255))  # White background
-        screen.blit(background_image_game, (0, 0))  # Draw the game screen background (Olukunle.jpg)
-
-        # Display text box with fufu text
-        pygame.draw.rect(screen, (0, 0, 0), (150, 450, 500, 100))  # Black box for text
-        draw_text_in_box(fufu_text, pygame.Rect(150, 450, 500, 100), font, (255, 255, 255))  # Draw text inside box
+        screen.blit(background_image_game, (0, 0))  # Draw the game screen background
 
         # Show the options: Village or Jungle
-        if button3_rect.collidepoint(pygame.mouse.get_pos()):
-            draw_button(button3_rect, "Go to Village")
-        else:
-            draw_button(button3_rect, "Go to Village")
-
-        if button4_rect.collidepoint(pygame.mouse.get_pos()):
-            draw_button(button4_rect, "Go to Jungle")
-        else:
-            draw_button(button4_rect, "Go to Jungle")
+        draw_button(button3_rect, "Go to Village")
+        draw_button(button4_rect, "Go to Jungle")
 
     elif current_screen == "village":
         # Village screen
         screen.fill((255, 255, 255))  # White background
         screen.blit(background_image_village, (0, 0))  # Draw market background for village
 
-        # If purchase is complete, show "Alright, you're done, let's get battling"
-        if purchase_complete:
-            battle_text = font.render("Alright, you're done, let's get battling!", True, (150, 100, 7))
-            screen.blit(battle_text, (200, 30))  # Display at the top
-
-        # Remove "You are in the village market!" text after purchase
-        if not purchase_complete:
-            village_text = font.render("You are in the village market!", True, (255, 255, 255))
-            screen.blit(village_text, (250, 50))  # Display village market text
-
-        # Draw items for purchase (only if not purchased)
+        # Display items to purchase
         if not warrior_monkey.purchased:
             draw_button(warrior_monkey.rect, f"Warrior Monkey: {warrior_monkey.cost} Naira")
         if not banana.purchased:
             draw_button(banana.rect, f"Banana: {banana.cost} Naira")
         if not machete.purchased:
             draw_button(machete.rect, f"Machete: {machete.cost} Naira")
+
+    elif current_screen == "jungle":
+        # Jungle screen
+        screen.fill((255, 255, 255))  # White background
+        screen.blit(background_image_jungle, (0, 0))  # Draw jungle background
+
+        # Draw message box
+        message_text = "Collect 5 bananas to survive here! I'll use your item if you have any to help you along"
+        message_box_rect = pygame.Rect(50, 20, screen_width - 100, 100)
+        pygame.draw.rect(screen, (0, 0, 0), message_box_rect)
+        draw_text_in_box(message_text, message_box_rect, font, (255, 255, 255))
+
+        # Continue Button
+        draw_button(continue_button_rect, "Continue")
+
+    elif current_screen == "new_background":
+        # After advancing, change to new background
+        screen.fill((255, 255, 255))
+        screen.blit(background_image_new, (0, 0))  # Draw new.jpg background
+
+        # Display rewards at the top
+        display_rewards()  # Call the function to show the rewards
+
+        # Draw Eat and Sell buttons
+        draw_button(eat_button_rect, "Eat Banana")
+        draw_button(sell_button_rect, "Sell Banana")
+
+        # Display banana status
+        if banana_eaten:
+            banana_status_text = "Banana eaten"
+        elif banana_sold:
+            banana_status_text = "Banana sold"
+        else:
+            banana_status_text = "Banana available"
+
+        banana_status_surface = font.render(banana_status_text, True, (255, 255, 255))  # White text
+        screen.blit(banana_status_surface, (10, 150))  # Display banana status
 
     # Draw the money counter in the top-left corner
     draw_money_counter()
